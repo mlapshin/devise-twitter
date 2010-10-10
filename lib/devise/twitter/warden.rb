@@ -23,19 +23,10 @@ Warden::OAuth.access_token_user_finder(:twitter) do |access_token|
     previous_user = @env['warden'].user
 
     # Try to find user by token
-    user = klass.find_by_twitter_oauth_token_and_twitter_oauth_secret(access_token.token, access_token.secret)
+    user = klass.find_for_twitter_oauth(access_token)
 
     # Since we are logging in a new user we want to make sure the before_logout hook is called
     @env['warden'].logout if previous_user.present?
-
-    if user.nil?
-      # Create user if we don't know him yet
-      user = klass.new
-      user.twitter_handle = twitter_handle
-      user.twitter_oauth_token = access_token.token
-      user.twitter_oauth_secret = access_token.secret
-      user.save
-    end
 
     return user
   end
